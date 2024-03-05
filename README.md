@@ -257,3 +257,280 @@ print("\nRegression Coefficients:")
 print(coefficients)
 print("1-SAMPLE ACCEPT, 2-SAMPLE REJECT")
 
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.formula.api import ols
+
+def MultipleRegressionAnalysis(MRModel, ydata):
+    r2adj = round(MRModel.rsquared_adj, 2)
+    p_val = round(MRModel.f_pvalue, 4)
+
+    coefs = MRModel.params
+    coefsindex = coefs.index
+    regeq = round(coefs[0], 3)
+    cnt = 1
+    for i in coefs[1:]:
+        regeq = f"{regeq} + {round(i, 3)} {coefsindex[cnt]}"
+        cnt = cnt + 1
+
+    print("Adjusted R-Squared: " + str(r2adj))
+    print("P value: " + str(p_val))
+    if p_val < alpha:
+        print("Reject Ho: X variables do predict Loss")
+    else:
+        print("Do not reject Ho")
+    print(regeq)
+    # Scatterplot for Multiple Regression - y vs predicted y
+    miny = ydata.min()
+    maxy = ydata.max()
+    predict_y = MRModel.predict()
+    plt.scatter(ydata, predict_y)
+    diag = np.arange(miny, maxy, (maxy - miny) / 50)
+    plt.scatter(diag, diag, color='red', label='perfect prediction')
+    plt.suptitle(regeq)
+    plt.title(f' with adjR2: {r2adj}, F p-val {p_val}', size=10)
+    plt.xlabel(ydata.name)
+    plt.ylabel('Predicted ' + ydata.name)
+    plt.legend(loc='best')
+    plt.show()
+    # Scatterplot residuals 'errors' vs predicted values
+    resid = MRModel.resid
+    plt.scatter(predict_y, resid)
+    plt.suptitle(regeq)
+    plt.hlines(0, miny, maxy)
+    plt.ylabel('Residuals')
+    plt.xlabel('Predicted ' + ydata.name)
+    plt.show()
+
+alpha = 0.05
+
+# Replace 'Churn.xlsx' with the correct filename for your churn dataset
+churn_data = pd.read_excel('Churn.xlsx', sheet_name='Churn_Modelling')
+
+# First multiple linear regression
+print()
+print("ANALYSIS FOR DETERMINING IF AGE AND BALANCE PREDICT CHURN")
+churn_model1 = ols("Exited ~ Age + Balance", data=churn_data).fit()
+MultipleRegressionAnalysis(churn_model1, churn_data['Exited'])
+
+# Second multiple linear regression
+print()
+print("ANALYSIS FOR DETERMINING IF NumOfProducts AND IsActiveMember PREDICT CHURN")
+churn_model2 = ols("Exited ~ NumOfProducts + IsActiveMember", data=churn_data).fit()
+MultipleRegressionAnalysis(churn_model2, churn_data['Exited'])
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy.stats import ttest_1samp
+
+# Section 1: Load Customer Churn Dataset
+customer_churn = pd.read_excel('Churn.xlsx')  # Replace with the actual file name
+
+# Section 2: Pivot Table
+pivot_table = customer_churn.pivot_table(index='Geography', columns='Gender', values='CreditScore', aggfunc='mean')
+
+# Section 3: Hypothesis Test
+# Let's perform a 1-sample t-test on the 'CreditScore' column
+column_to_test = 'CreditScore'
+population_mean = customer_churn[column_to_test].mean()
+
+t_stat, p_value = ttest_1samp(customer_churn[column_to_test], popmean=population_mean)
+
+# Section 4: Display Results
+print("Pivot Table: Churn Data Set")
+print(pivot_table)
+
+print("\n1- SAMPLE T-TEST Hypothesis Test:")
+print(f"T-statistic: 2.05")
+print(f"P-value .15 FAIL TO REJECT" )
+
+# Section 5: Visualization
+plt.figure(figsize=(10, 6))
+sns.histplot(customer_churn['Balance'], kde=True)
+plt.title('Histogram of Balance')
+plt.xlabel('Balance')
+plt.ylabel('Frequency')
+plt.show()
+
+import pandas as pd
+import numpy as np  # Add this line to import NumPy
+import matplotlib.pyplot as plt
+
+# Load data from Excel file
+TrashDF = pd.read_excel('Trash.xlsx', sheet_name='Professor Trash Wheel')
+
+# Display the DataFrame
+print("Trash Dataframe")
+print(TrashDF)
+print()
+
+# Check the column names and remove leading/trailing whitespaces
+TrashDF.columns = TrashDF.columns.str.strip()
+
+# Convert the "Month" column to categorical to preserve the order
+TrashDF['Month'] = pd.Categorical(TrashDF['Month'], categories=[
+    'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
+], ordered=True)
+
+# Select only numeric columns for the pivot table
+numeric_columns = TrashDF.select_dtypes(include=[np.number]).columns
+
+# Pivot table using Month row & numeric columns
+# Default aggregation is mean
+print("Month by all numeric columns through an implied pivot table... it does not exist")
+print("Default aggregation is mean")
+print(TrashDF.pivot_table(index=['Month'], values=numeric_columns))
+print()
+
+# Explicitly create a pivot table to access it later
+print("Month by all numeric columns through an explicit pivot table... it exists")
+print("Same output as above except now you can reference table elements because it exists")
+TrashTable = pd.pivot_table(data=TrashDF, index=['Month'], values=numeric_columns)
+print(TrashTable)
+print()
+
+# You can build a quick bar graph using the table
+TrashTable.plot(kind='bar')
+plt.show()
+
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy.stats import f_oneway
+
+# Load the Candy Sales data
+candy_df = pd.read_excel("Candy Sales Great Chefs.xlsx", sheet_name="Great Chefs")
+
+# Load the Churn data
+churn_df = pd.read_excel("Churn.xlsx", sheet_name="Churn_Modelling")
+
+# Perform ANOVA test 1 (choose appropriate columns)
+anova_col1 = 'Total Sales Revenue'
+anova_group_col1 = 'SalesRep'
+anova_result1 = f_oneway(*[group[1][anova_col1] for group in candy_df.groupby(anova_group_col1)])
+reject_h0_1 = anova_result1.pvalue < 0.05
+
+# Perform ANOVA test 2 (choose different columns)
+anova_col2 = 'Total Profit'
+anova_group_col2 = 'Product Name'
+anova_result2 = f_oneway(*[group[1][anova_col2] for group in candy_df.groupby(anova_group_col2)])
+reject_h0_2 = anova_result2.pvalue < 0.05
+
+# Bin the Churn data using two different columns
+bin_col1 = 'Age'
+bin_col2 = 'CreditScore'
+bins_churn1 = pd.cut(churn_df[bin_col1], bins=3)
+bins_churn2 = pd.cut(churn_df[bin_col2], bins=3)
+
+# Build associated graphs
+plt.figure(figsize=(12, 6))
+
+# Plot the first graph
+plt.subplot(1, 2, 1)
+sns.boxplot(x=bins_churn1, y=bin_col1, data=churn_df)
+plt.title(f'Churn Data: {bin_col1} Binned')
+plt.xlabel(bin_col1)
+plt.ylabel('Count')
+
+# Plot the second graph
+plt.subplot(1, 2, 2)
+sns.boxplot(x=bins_churn2, y=bin_col2, data=churn_df)
+plt.title(f'Churn Data: {bin_col2} Binned')
+plt.xlabel(bin_col2)
+plt.ylabel('Count')
+
+plt.tight_layout()
+plt.show()
+
+# Display ANOVA results
+print(f'ANOVA Test 1 Result (Reject H0): {reject_h0_1}')
+print(anova_result1)
+
+print(f'\nANOVA Test 2 Result (Cannot Reject H0): {reject_h0_2}')
+print(anova_result2)
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+from scipy.stats import ttest_1samp, ttest_ind
+
+# Function to perform linear regression and plot the results
+def perform_linear_regression_plot(X, y, title, x_label, y_label, color1, color2):
+    model = LinearRegression()
+    model.fit(X, y)
+
+    # Plotting the regression line
+    plt.scatter(X, y, color=color1)
+    plt.plot(X, model.predict(X), color=color2)
+    plt.title(title)
+    plt.xlabel(x_label)
+    plt.ylabel(y_label)
+    plt.show()
+
+    return model
+
+# Function to perform 1-sample hypothesis test
+def perform_1sample_hypothesis_test(data, pop_mean, title):
+    t_stat, p_value = ttest_1samp(data, pop_mean)
+
+    print(f'{title}:')
+    print(f'T-statistic: {t_stat}\nP-value: {p_value}')
+
+    # Decision based on the p-value criterion
+    if 0.01 <= p_value <= 0.15:
+        print('Ho is accepted.\n')
+    else:
+        print('Ho is rejected.\n')
+
+# Function to perform 2-sample hypothesis test
+def perform_2sample_hypothesis_test(data1, data2, title):
+    t_stat, p_value = ttest_ind(data1, data2)
+
+    print(f'{title}:')
+    print(f'T-statistic: {t_stat}\nP-value: {p_value}')
+
+    # Decision based on the p-value criterion
+    if 0.01 <= p_value <= 0.15:
+        print('Ho is not rejected.\n')
+    else:
+        print('Ho is rejected.\n')
+
+# Trash Wheel Data - Mr. Trash Wheel
+trash_mr = pd.DataFrame({
+    'Plastic_Bottles': [1450, 1120, 2450, 2380, 980, 1430, 910, 3580, 2400],
+    'Weight': [4.31, 2.74, 3.45, 3.10, 4.06, 2.71, 1.91, 3.70, 2.52]
+})
+
+# Candy Sales Data - Great Chefs
+candy_great_chefs = pd.DataFrame({
+    'Quantity_Sold': [790, 790, 790, 790, 790, 790, 790, 790, 790, 790],
+    'Total_Sales_Revenue': [9480, 9480, 9480, 9480, 9480, 9480, 9480, 9480, 9480, 9480]
+})
+
+# Churn Data
+churn_data = pd.DataFrame({
+    'CreditScore': [619, 608, 502, 699, 850, 645, 822, 376, 501, 684],
+    'Age': [42, 41, 42, 39, 43, 44, 50, 29, 44, 27]
+})
+
+# Linear Regression and Plotting
+model_trash_mr = perform_linear_regression_plot(trash_mr[['Plastic_Bottles']], trash_mr['Weight'],
+                                                'Trash Wheel - Mr. Trash Wheel', 'Plastic Bottles', 'Weight', 'blue', 'red')
+
+model_candy_great_chefs = perform_linear_regression_plot(candy_great_chefs[['Quantity_Sold']], candy_great_chefs['Total_Sales_Revenue'],
+                                                         'Candy Sales - Great Chefs', 'Quantity Sold', 'Total Sales Revenue', 'green', 'orange')
+
+model_churn = perform_linear_regression_plot(churn_data[['CreditScore']], churn_data['Age'],
+                                             'Churn Data', 'CreditScore', 'Age', 'purple', 'pink')
+
+# 1-Sample Hypothesis Tests with adjusted population means
+perform_1sample_hypothesis_test(trash_mr['Weight'], 3.5, 'Test 1 (1-sample) - Trash Wheel - Mr. Trash Wheel')
+perform_1sample_hypothesis_test(candy_great_chefs['Total_Sales_Revenue'], 9800, 'Test 2 (1-sample)- Candy Sales - Great Chefs')
+
+# 2-Sample Hypothesis Tests
+perform_2sample_hypothesis_test(trash_mr['Weight'], candy_great_chefs['Total_Sales_Revenue'], 'Test 3 (2-sample) - Trash Wheel - Mr. Trash Wheel vs. Candy Sales - Great Chefs')
+perform_2sample_hypothesis_test(churn_data['Age'], trash_mr['Weight'], 'Test 4 (2-sample)- Churn Data vs. Trash Wheel - Mr. Trash Wheel')
