@@ -1,4 +1,6 @@
 # Work-Examples
+
+
 This is a page with some project code examples.
 
 A HOMEWORK DEMONSTRATING OPTIMIZATION OF TEACHER GIFTS (CARS!):
@@ -18,7 +20,7 @@ Aditionally in this section I reformated my section headings and texts to be mor
 INSTALL PACKAGES AND INITIAL DATAFRAME
 INSERT PACKAGES
 
-# Instilation of the pyomo and solver packages
+Instilation of the pyomo and solver packages
 !pip install pyomo
 !apt-get install -y -qq glpk-utils
 Requirement already satisfied: pyomo in /usr/local/lib/python3.10/dist-packages (6.7.1)
