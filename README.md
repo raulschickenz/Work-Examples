@@ -1,13 +1,19 @@
 # Work-Examples
 This is a page with some project code examples.
-HW 2 Reflection Secion
-As a note I feel as though my code is much better than Chat GPT. Chat GPT ignored one of the constraints and overall I believe my formatting fits the mold of our demonstrated class work.
 
+A HOMEWORK DEMONSTRATING OPTIMIZATION OF TEACHER GIFTS (CARS!):
+
+HW 2 Reflection Secion
+
+COMBINATION OF MY INITAL EFFORT AND CHATGPT HEATMAP
 Hence Below will be the instillation of my effort with an addition of chat GPT's designated seaborn heatmap (I liked the heat map).
 
-In reflecting, Chat GPT does not build neccessary dataframes and format things as well. Hence, constraints are overall ignored in certain cases. For example ChatGPT had student three with three cars.
+In reflecting, Chat GPT does not build neccessary dataframes and format things as well. 
+
+Hence, constraints are overall ignored in certain cases. For example ChatGPT had student three with three cars.
 
 Aditionally in this section I reformated my section headings and texts to be more professional.
+
 
 INSTALL PACKAGES AND INITIAL DATAFRAME
 INSERT PACKAGES
